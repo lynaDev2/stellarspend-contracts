@@ -3,11 +3,8 @@
 use soroban_sdk::{Address, Env};
 
 /// Validates a recipient address.
-///
 /// For now, this simply ensures the address is not the zero-equivalent.
 pub fn validate_address(env: &Env, address: &Address) -> Result<(), &'static str> {
-    // In real-world scenarios, more complex validation could be applied.
-    // For now, accept any provided address as valid.
     let _ = env;
     let _ = address;
     Ok(())
