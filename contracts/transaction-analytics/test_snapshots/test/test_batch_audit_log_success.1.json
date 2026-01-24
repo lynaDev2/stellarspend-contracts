@@ -1,6 +1,6 @@
 {
   "generators": {
-    "address": 4,
+    "address": 3,
     "nonce": 0
   },
   "auth": [
@@ -13,7 +13,7 @@
           "function": {
             "contract_fn": {
               "contract_address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD2KM",
-              "function_name": "process_batch",
+              "function_name": "batch_audit_log",
               "args": [
                 {
                   "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAFCT4"
@@ -24,26 +24,7 @@
                       "map": [
                         {
                           "key": {
-                            "symbol": "amount"
-                          },
-                          "val": {
-                            "i128": {
-                              "hi": 0,
-                              "lo": 1000
-                            }
-                          }
-                        },
-                        {
-                          "key": {
-                            "symbol": "category"
-                          },
-                          "val": {
-                            "symbol": "transfer"
-                          }
-                        },
-                        {
-                          "key": {
-                            "symbol": "from"
+                            "symbol": "actor"
                           },
                           "val": {
                             "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
@@ -51,40 +32,78 @@
                         },
                         {
                           "key": {
+                            "symbol": "operation"
+                          },
+                          "val": {
+                            "symbol": "login"
+                          }
+                        },
+                        {
+                          "key": {
+                            "symbol": "status"
+                          },
+                          "val": {
+                            "symbol": "success"
+                          }
+                        },
+                        {
+                          "key": {
                             "symbol": "timestamp"
                           },
                           "val": {
-                            "u64": 0
+                            "u64": 1000
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "map": [
+                        {
+                          "key": {
+                            "symbol": "actor"
+                          },
+                          "val": {
+                            "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
                           }
                         },
                         {
                           "key": {
-                            "symbol": "to"
+                            "symbol": "operation"
                           },
                           "val": {
-                            "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAITA4"
+                            "symbol": "update_profile"
                           }
                         },
                         {
                           "key": {
-                            "symbol": "tx_id"
+                            "symbol": "status"
                           },
                           "val": {
-                            "u64": 1
+                            "symbol": "success"
+                          }
+                        },
+                        {
+                          "key": {
+                            "symbol": "timestamp"
+                          },
+                          "val": {
+                            "u64": 1005
                           }
                         }
                       ]
                     }
                   ]
-                },
-                "void"
+                }
               ]
             }
           },
           "sub_invocations": []
         }
       ]
-    ]
+    ],
+    [],
+    [],
+    []
   ],
   "ledger": {
     "protocol_version": 22,
@@ -103,7 +122,7 @@
             "key": {
               "vec": [
                 {
-                  "symbol": "BatchMetrics"
+                  "symbol": "AuditLog"
                 },
                 {
                   "u64": 1
@@ -123,7 +142,7 @@
                 "key": {
                   "vec": [
                     {
-                      "symbol": "BatchMetrics"
+                      "symbol": "AuditLog"
                     },
                     {
                       "u64": 1
@@ -135,78 +154,34 @@
                   "map": [
                     {
                       "key": {
-                        "symbol": "avg_amount"
+                        "symbol": "actor"
                       },
                       "val": {
-                        "i128": {
-                          "hi": 0,
-                          "lo": 1000
-                        }
+                        "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
                       }
                     },
                     {
                       "key": {
-                        "symbol": "max_amount"
+                        "symbol": "operation"
                       },
                       "val": {
-                        "i128": {
-                          "hi": 0,
-                          "lo": 1000
-                        }
+                        "symbol": "login"
                       }
                     },
                     {
                       "key": {
-                        "symbol": "min_amount"
+                        "symbol": "status"
                       },
                       "val": {
-                        "i128": {
-                          "hi": 0,
-                          "lo": 1000
-                        }
+                        "symbol": "success"
                       }
                     },
                     {
                       "key": {
-                        "symbol": "processed_at"
+                        "symbol": "timestamp"
                       },
                       "val": {
-                        "u64": 0
-                      }
-                    },
-                    {
-                      "key": {
-                        "symbol": "total_volume"
-                      },
-                      "val": {
-                        "i128": {
-                          "hi": 0,
-                          "lo": 1000
-                        }
-                      }
-                    },
-                    {
-                      "key": {
-                        "symbol": "tx_count"
-                      },
-                      "val": {
-                        "u32": 1
-                      }
-                    },
-                    {
-                      "key": {
-                        "symbol": "unique_recipients"
-                      },
-                      "val": {
-                        "u32": 1
-                      }
-                    },
-                    {
-                      "key": {
-                        "symbol": "unique_senders"
-                      },
-                      "val": {
-                        "u32": 1
+                        "u64": 1000
                       }
                     }
                   ]
@@ -225,10 +200,10 @@
             "key": {
               "vec": [
                 {
-                  "symbol": "KnownTransaction"
+                  "symbol": "AuditLog"
                 },
                 {
-                  "u64": 1
+                  "u64": 2
                 }
               ]
             },
@@ -245,16 +220,49 @@
                 "key": {
                   "vec": [
                     {
-                      "symbol": "KnownTransaction"
+                      "symbol": "AuditLog"
                     },
                     {
-                      "u64": 1
+                      "u64": 2
                     }
                   ]
                 },
                 "durability": "persistent",
                 "val": {
-                  "bool": true
+                  "map": [
+                    {
+                      "key": {
+                        "symbol": "actor"
+                      },
+                      "val": {
+                        "address": "CAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHK3M"
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "operation"
+                      },
+                      "val": {
+                        "symbol": "update_profile"
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "status"
+                      },
+                      "val": {
+                        "symbol": "success"
+                      }
+                    },
+                    {
+                      "key": {
+                        "symbol": "timestamp"
+                      },
+                      "val": {
+                        "u64": 1005
+                      }
+                    }
+                  ]
                 }
               }
             },
@@ -307,7 +315,7 @@
                           ]
                         },
                         "val": {
-                          "u64": 1
+                          "u64": 0
                         }
                       },
                       {
@@ -319,7 +327,7 @@
                           ]
                         },
                         "val": {
-                          "u64": 0
+                          "u64": 2
                         }
                       },
                       {
@@ -331,7 +339,7 @@
                           ]
                         },
                         "val": {
-                          "u64": 1
+                          "u64": 0
                         }
                       }
                     ]
@@ -400,231 +408,5 @@
       ]
     ]
   },
-  "events": [
-    {
-      "event": {
-        "ext": "v0",
-        "contract_id": "0000000000000000000000000000000000000000000000000000000000000001",
-        "type_": "contract",
-        "body": {
-          "v0": {
-            "topics": [
-              {
-                "symbol": "analytics"
-              },
-              {
-                "symbol": "started"
-              }
-            ],
-            "data": {
-              "vec": [
-                {
-                  "u64": 1
-                },
-                {
-                  "u32": 1
-                }
-              ]
-            }
-          }
-        }
-      },
-      "failed_call": false
-    },
-    {
-      "event": {
-        "ext": "v0",
-        "contract_id": "0000000000000000000000000000000000000000000000000000000000000001",
-        "type_": "contract",
-        "body": {
-          "v0": {
-            "topics": [
-              {
-                "symbol": "batch"
-              },
-              {
-                "symbol": "processed"
-              },
-              {
-                "u64": 1
-              }
-            ],
-            "data": {
-              "map": [
-                {
-                  "key": {
-                    "symbol": "avg_amount"
-                  },
-                  "val": {
-                    "i128": {
-                      "hi": 0,
-                      "lo": 1000
-                    }
-                  }
-                },
-                {
-                  "key": {
-                    "symbol": "max_amount"
-                  },
-                  "val": {
-                    "i128": {
-                      "hi": 0,
-                      "lo": 1000
-                    }
-                  }
-                },
-                {
-                  "key": {
-                    "symbol": "min_amount"
-                  },
-                  "val": {
-                    "i128": {
-                      "hi": 0,
-                      "lo": 1000
-                    }
-                  }
-                },
-                {
-                  "key": {
-                    "symbol": "processed_at"
-                  },
-                  "val": {
-                    "u64": 0
-                  }
-                },
-                {
-                  "key": {
-                    "symbol": "total_volume"
-                  },
-                  "val": {
-                    "i128": {
-                      "hi": 0,
-                      "lo": 1000
-                    }
-                  }
-                },
-                {
-                  "key": {
-                    "symbol": "tx_count"
-                  },
-                  "val": {
-                    "u32": 1
-                  }
-                },
-                {
-                  "key": {
-                    "symbol": "unique_recipients"
-                  },
-                  "val": {
-                    "u32": 1
-                  }
-                },
-                {
-                  "key": {
-                    "symbol": "unique_senders"
-                  },
-                  "val": {
-                    "u32": 1
-                  }
-                }
-              ]
-            }
-          }
-        }
-      },
-      "failed_call": false
-    },
-    {
-      "event": {
-        "ext": "v0",
-        "contract_id": "0000000000000000000000000000000000000000000000000000000000000001",
-        "type_": "contract",
-        "body": {
-          "v0": {
-            "topics": [
-              {
-                "symbol": "category"
-              },
-              {
-                "u64": 1
-              },
-              {
-                "symbol": "transfer"
-              }
-            ],
-            "data": {
-              "map": [
-                {
-                  "key": {
-                    "symbol": "category"
-                  },
-                  "val": {
-                    "symbol": "transfer"
-                  }
-                },
-                {
-                  "key": {
-                    "symbol": "total_volume"
-                  },
-                  "val": {
-                    "i128": {
-                      "hi": 0,
-                      "lo": 1000
-                    }
-                  }
-                },
-                {
-                  "key": {
-                    "symbol": "tx_count"
-                  },
-                  "val": {
-                    "u32": 1
-                  }
-                },
-                {
-                  "key": {
-                    "symbol": "volume_percentage_bps"
-                  },
-                  "val": {
-                    "u32": 10000
-                  }
-                }
-              ]
-            }
-          }
-        }
-      },
-      "failed_call": false
-    },
-    {
-      "event": {
-        "ext": "v0",
-        "contract_id": "0000000000000000000000000000000000000000000000000000000000000001",
-        "type_": "contract",
-        "body": {
-          "v0": {
-            "topics": [
-              {
-                "symbol": "analytics"
-              },
-              {
-                "symbol": "complete"
-              }
-            ],
-            "data": {
-              "vec": [
-                {
-                  "u64": 1
-                },
-                {
-                  "u64": 1
-                }
-              ]
-            }
-          }
-        }
-      },
-      "failed_call": false
-    }
-  ]
+  "events": []
 }

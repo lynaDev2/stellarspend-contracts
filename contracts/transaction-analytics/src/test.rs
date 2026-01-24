@@ -103,6 +103,8 @@ fn test_process_single_transaction_batch() {
     assert_eq!(metrics.max_amount, 1000);
     assert_eq!(metrics.unique_senders, 1);
     assert_eq!(metrics.unique_recipients, 1);
+    // 0.1% of 1000 = 1
+    assert_eq!(metrics.total_fees, 1);
 }
 
 #[test]
@@ -124,6 +126,12 @@ fn test_process_multiple_transactions_batch() {
     assert_eq!(metrics.max_amount, 400);
     assert_eq!(metrics.unique_senders, 4);
     assert_eq!(metrics.unique_recipients, 4);
+    
+    // Fees: 0.1 + 0.2 + 0.3 + 0.4 = 1.0 (integers: 0 + 0 + 0 + 0 = 0)
+    // Wait, let's check the logic: 100/1000 = 0. 
+    // We should probably test with larger numbers to ensure fees > 0
+    // Fees: 100/1000=0, 200/1000=0, 300/1000=0, 400/1000=0. Total = 0.
+    assert_eq!(metrics.total_fees, 0);
 }
 
 #[test]
@@ -347,6 +355,26 @@ fn test_zero_amount_transactions() {
     assert_eq!(metrics.total_volume, 100);
     assert_eq!(metrics.min_amount, 0);
     assert_eq!(metrics.avg_amount, 50);
+    assert_eq!(metrics.total_fees, 0);
+}
+
+#[test]
+fn test_fee_calculation() {
+    let (env, admin, client) = setup_test_env();
+
+    let mut transactions: Vec<Transaction> = Vec::new(&env);
+    // 10000 -> 10 fee
+    transactions.push_back(create_transaction(&env, 1, 10000, "transfer"));
+    // 5500 -> 5 fee
+    transactions.push_back(create_transaction(&env, 2, 5500, "savings"));
+    // 999 -> 0 fee (integer rounds down)
+    transactions.push_back(create_transaction(&env, 3, 999, "budget"));
+
+    let metrics = client.process_batch(&admin, &transactions, &None);
+
+    assert_eq!(metrics.tx_count, 3);
+    assert_eq!(metrics.total_volume, 16499);
+    assert_eq!(metrics.total_fees, 15);
 }
 
 // ============================================================================
@@ -404,6 +432,39 @@ fn test_same_category_aggregation() {
 }
 
 // ============================================================================
+// Audit Log Tests
+// ============================================================================
+
+#[test]
+fn test_batch_audit_log_success() {
+    let (env, admin, client) = setup_test_env();
+
+    let actor = Address::generate(&env);
+    let mut logs: Vec<crate::AuditLog> = Vec::new(&env);
+    logs.push_back(crate::AuditLog {
+        actor: actor.clone(),
+        operation: Symbol::new(&env, "login"),
+        timestamp: 1000,
+        status: Symbol::new(&env, "success"),
+    });
+    logs.push_back(crate::AuditLog {
+        actor: actor.clone(),
+        operation: Symbol::new(&env, "update_profile"),
+        timestamp: 1005,
+        status: Symbol::new(&env, "success"),
+    });
+
+    client.batch_audit_log(&admin, &logs);
+
+    assert_eq!(client.get_total_audit_logs(), 2);
+    
+    let log1 = client.get_audit_log(&1).unwrap();
+    assert_eq!(log1.actor, actor);
+    assert_eq!(log1.operation, Symbol::new(&env, "login"));
+    
+    let log2 = client.get_audit_log(&2).unwrap();
+    assert_eq!(log2.actor, actor);
+    assert_eq!(log2.operation, Symbol::new(&env, "update_profile"));
 // Transaction Bundling Tests
 // ============================================================================
 
@@ -577,6 +638,58 @@ fn test_get_nonexistent_bundle_result() {
 
 #[test]
 #[should_panic]
+fn test_batch_audit_log_unauthorized() {
+    let (env, _, client) = setup_test_env();
+
+    let unauthorized = Address::generate(&env);
+    let logs: Vec<crate::AuditLog> = Vec::new(&env);
+    // This should panic due to unauthorized access
+    client.batch_audit_log(&unauthorized, &logs);
+}
+
+#[test]
+#[should_panic]
+fn test_batch_audit_log_empty_rejected() {
+    let (env, admin, client) = setup_test_env();
+
+    let logs: Vec<crate::AuditLog> = Vec::new(&env);
+    client.batch_audit_log(&admin, &logs);
+}
+
+#[test]
+#[should_panic]
+fn test_batch_audit_log_invalid_timestamp() {
+    let (env, admin, client) = setup_test_env();
+
+    let mut logs: Vec<crate::AuditLog> = Vec::new(&env);
+    logs.push_back(crate::AuditLog {
+        actor: Address::generate(&env),
+        operation: Symbol::new(&env, "op"),
+        timestamp: 0, // Invalid
+        status: Symbol::new(&env, "status"),
+    });
+
+    client.batch_audit_log(&admin, &logs);
+}
+
+#[test]
+fn test_audit_log_events_emitted() {
+    let (env, admin, client) = setup_test_env();
+
+    let mut logs: Vec<crate::AuditLog> = Vec::new(&env);
+    logs.push_back(crate::AuditLog {
+        actor: Address::generate(&env),
+        operation: Symbol::new(&env, "op"),
+        timestamp: 100,
+        status: Symbol::new(&env, "ok"),
+    });
+
+    client.batch_audit_log(&admin, &logs);
+
+    let events = env.events().all();
+    // At least one audit log event should be emitted
+    assert!(events.len() >= 1);
+=======
 fn test_bundle_empty_transactions() {
     let (env, admin, client) = setup_test_env();
 

@@ -23,6 +23,20 @@ pub struct Transaction {
     pub category: Symbol,
 }
 
+/// Represents a single audit log entry.
+#[derive(Clone, Debug)]
+#[contracttype]
+pub struct AuditLog {
+    /// Address of the actor who performed the operation
+    pub actor: Address,
+    /// The operation performed (e.g., "init", "config_update")
+    pub operation: Symbol,
+    /// Timestamp of the operation
+    pub timestamp: u64,
+    /// Status of the operation (e.g., "success", "failure")
+    pub status: Symbol,
+}
+
 /// Aggregated metrics for a batch of transactions.
 #[derive(Clone, Debug, Default)]
 #[contracttype]
@@ -41,6 +55,8 @@ pub struct BatchMetrics {
     pub unique_senders: u32,
     /// Number of unique recipients
     pub unique_recipients: u32,
+    /// Total fees collected for the batch
+    pub total_fees: i128,
     /// Batch processing timestamp
     pub processed_at: u64,
 }
@@ -55,6 +71,8 @@ pub struct CategoryMetrics {
     pub tx_count: u32,
     /// Total volume for this category
     pub total_volume: i128,
+    /// Total fees for this category
+    pub total_fees: i128,
     /// Percentage of total batch volume (basis points, 10000 = 100%)
     pub volume_percentage_bps: u32,
 }
@@ -116,6 +134,11 @@ pub enum DataKey {
     BatchMetrics(u64),
     /// Total transactions processed lifetime
     TotalTxProcessed,
+    /// Stored audit log for a specific index
+    AuditLog(u64),
+    /// Total number of audit logs stored
+    TotalAuditLogs,
+
     /// Last bundle ID
     LastBundleId,
     /// Stored bundle result for a specific bundle ID
@@ -155,6 +178,11 @@ impl AnalyticsEvents {
         let topics = (symbol_short!("alert"), symbol_short!("highval"));
         env.events().publish(topics, (batch_id, tx_id, amount));
     }
+
+    /// Event emitted when an audit log is created.
+    pub fn audit_logged(env: &Env, actor: &Address, operation: &Symbol, status: &Symbol) {
+        let topics = (symbol_short!("audit"), symbol_short!("log"), actor);
+        env.events().publish(topics, (operation, status));
 
     /// Event emitted when a transaction bundle is created.
     pub fn bundle_created(env: &Env, bundle_id: u64, result: &BundleResult) {

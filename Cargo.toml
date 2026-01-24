@@ -2,9 +2,11 @@
 resolver = "2"
 members = [
     "contracts/transaction-analytics",
+    "contracts/contract-upgrade/old_contract",
+    "contracts/contract-upgrade/new_contract",
     "contracts/batch-transfer",
     "contracts/budget-recommendations",
-    "contracts/batch-wallet-creation",
+    "contracts/savings-goals",
 ]
 
 [workspace.package]

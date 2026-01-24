@@ -1,11 +1,9 @@
 {
   "generators": {
-    "address": 2,
+    "address": 3,
     "nonce": 0
   },
   "auth": [
-    [],
-    [],
     [],
     [],
     []
@@ -60,18 +58,6 @@
                           "vec": [
                             {
                               "symbol": "LastBatchId"
-                            }
-                          ]
-                        },
-                        "val": {
-                          "u64": 0
-                        }
-                      },
-                      {
-                        "key": {
-                          "vec": [
-                            {
-                              "symbol": "TotalAuditLogs"
                             }
                           ]
                         },
