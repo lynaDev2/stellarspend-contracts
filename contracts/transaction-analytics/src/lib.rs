@@ -26,6 +26,10 @@ use soroban_sdk::{contract, contractimpl, panic_with_error, Address, Env, Vec};
 
 pub use crate::analytics::{
     compute_batch_checksum, compute_batch_metrics, compute_category_metrics,
+    find_high_value_transactions, validate_audit_logs, validate_batch,
+};
+pub use crate::types::{
+    AnalyticsEvents, AuditLog, BatchMetrics, CategoryMetrics, DataKey, Transaction, MAX_BATCH_SIZE,
     create_bundle_result, find_high_value_transactions, validate_batch,
     validate_bundle_transactions, validate_transaction_for_bundle,
 };
@@ -50,6 +54,8 @@ pub enum AnalyticsError {
     BatchTooLarge = 5,
     /// Invalid transaction amount
     InvalidAmount = 6,
+    /// Invalid audit log data
+    InvalidAuditLog = 7,
     /// Bundle is empty
     EmptyBundle = 7,
     /// Bundle exceeds maximum size
@@ -82,6 +88,7 @@ impl TransactionAnalyticsContract {
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage().instance().set(&DataKey::LastBatchId, &0u64);
         env.storage().instance().set(&DataKey::TotalTxProcessed, &0u64);
+        env.storage().instance().set(&DataKey::TotalAuditLogs, &0u64);
     }
 
     /// Generates batch analytics for multiple transactions.
@@ -187,6 +194,43 @@ impl TransactionAnalyticsContract {
         metrics
     }
 
+    /// Logs multiple operations in a single batch (Audit Logging).
+    ///
+    /// # Arguments
+    /// * `env` - The contract environment
+    /// * `caller` - The address calling this function (must be admin)
+    /// * `logs` - Vector of audit logs to store
+    pub fn batch_audit_log(env: Env, caller: Address, logs: Vec<AuditLog>) {
+        // Verify authorization
+        caller.require_auth();
+        Self::require_admin(&env, &caller);
+
+        // Validate logs
+        if let Err(_) = validate_audit_logs(&logs) {
+            panic_with_error!(&env, AnalyticsError::InvalidAuditLog);
+        }
+
+        // Get current total audit logs
+        let mut total_logs: u64 = env
+            .storage()
+            .instance()
+            .get(&DataKey::TotalAuditLogs)
+            .unwrap_or(0);
+
+        // Store each log and emit event
+        for log in logs.iter() {
+            total_logs += 1;
+            env.storage()
+                .persistent()
+                .set(&DataKey::AuditLog(total_logs), &log);
+            
+            AnalyticsEvents::audit_logged(&env, &log.actor, &log.operation, &log.status);
+        }
+
+        // Update total count
+        env.storage().instance().set(&DataKey::TotalAuditLogs, &total_logs);
+    }
+
     /// Retrieves stored metrics for a specific batch.
     ///
     /// # Arguments
@@ -214,6 +258,21 @@ impl TransactionAnalyticsContract {
         env.storage()
             .instance()
             .get(&DataKey::TotalTxProcessed)
+            .unwrap_or(0)
+    }
+
+    /// Retrieves an audit log by its index.
+    pub fn get_audit_log(env: Env, index: u64) -> Option<AuditLog> {
+        env.storage()
+            .persistent()
+            .get(&DataKey::AuditLog(index))
+    }
+
+    /// Returns the total number of audit logs stored.
+    pub fn get_total_audit_logs(env: Env) -> u64 {
+        env.storage()
+            .instance()
+            .get(&DataKey::TotalAuditLogs)
             .unwrap_or(0)
     }
 
