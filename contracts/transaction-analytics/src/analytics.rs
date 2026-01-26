@@ -10,8 +10,8 @@ use soroban_sdk::{Address, Env, Map, Symbol, Vec};
 
 use crate::types::{AuditLog, BatchMetrics, CategoryMetrics, Transaction, MAX_BATCH_SIZE};
 use crate::types::{
-    BatchMetrics, BundleResult, BundledTransaction, CategoryMetrics, Transaction,
-    ValidationResult, MAX_BATCH_SIZE,
+    BatchMetrics, BundleResult, BundledTransaction, CategoryMetrics, Transaction, ValidationResult,
+    MAX_BATCH_SIZE,
 };
 
 /// Calculates the processing fee for a transaction amount.
@@ -63,7 +63,7 @@ pub fn compute_batch_metrics(
     for tx in transactions.iter() {
         // Accumulate volume
         total_volume = total_volume.checked_add(tx.amount).unwrap_or(i128::MAX);
-        
+
         // Calculate and accumulate fees
         let fee = calculate_fee(tx.amount);
         total_fees = total_fees.checked_add(fee).unwrap_or(i128::MAX);
@@ -119,7 +119,7 @@ pub fn compute_category_metrics(
         category_map.set(
             tx.category.clone(),
             (
-                current.0 + 1, 
+                current.0 + 1,
                 current.1.checked_add(tx.amount).unwrap_or(i128::MAX),
                 current.2.checked_add(fee).unwrap_or(i128::MAX),
             ),

@@ -29,9 +29,9 @@ pub use crate::analytics::{
     find_high_value_transactions, validate_audit_logs, validate_batch,
 };
 pub use crate::types::{
-    AnalyticsEvents, AuditLog, BatchMetrics, CategoryMetrics, DataKey, Transaction, MAX_BATCH_SIZE,
     create_bundle_result, find_high_value_transactions, validate_batch,
-    validate_bundle_transactions, validate_transaction_for_bundle,
+    validate_bundle_transactions, validate_transaction_for_bundle, AnalyticsEvents, AuditLog,
+    BatchMetrics, CategoryMetrics, DataKey, Transaction, MAX_BATCH_SIZE,
 };
 pub use crate::types::{
     AnalyticsEvents, BatchMetrics, BundleResult, BundledTransaction, CategoryMetrics, DataKey,
@@ -87,8 +87,12 @@ impl TransactionAnalyticsContract {
 
         env.storage().instance().set(&DataKey::Admin, &admin);
         env.storage().instance().set(&DataKey::LastBatchId, &0u64);
-        env.storage().instance().set(&DataKey::TotalTxProcessed, &0u64);
-        env.storage().instance().set(&DataKey::TotalAuditLogs, &0u64);
+        env.storage()
+            .instance()
+            .set(&DataKey::TotalTxProcessed, &0u64);
+        env.storage()
+            .instance()
+            .set(&DataKey::TotalAuditLogs, &0u64);
     }
 
     /// Generates batch analytics for multiple transactions.
@@ -180,10 +184,13 @@ impl TransactionAnalyticsContract {
             .get(&DataKey::TotalTxProcessed)
             .unwrap_or(0);
 
-        env.storage().instance().set(&DataKey::LastBatchId, &batch_id);
         env.storage()
             .instance()
-            .set(&DataKey::TotalTxProcessed, &(total_processed + tx_count as u64));
+            .set(&DataKey::LastBatchId, &batch_id);
+        env.storage().instance().set(
+            &DataKey::TotalTxProcessed,
+            &(total_processed + tx_count as u64),
+        );
         env.storage()
             .persistent()
             .set(&DataKey::BatchMetrics(batch_id), &metrics);
@@ -223,12 +230,14 @@ impl TransactionAnalyticsContract {
             env.storage()
                 .persistent()
                 .set(&DataKey::AuditLog(total_logs), &log);
-            
+
             AnalyticsEvents::audit_logged(&env, &log.actor, &log.operation, &log.status);
         }
 
         // Update total count
-        env.storage().instance().set(&DataKey::TotalAuditLogs, &total_logs);
+        env.storage()
+            .instance()
+            .set(&DataKey::TotalAuditLogs, &total_logs);
     }
 
     /// Retrieves stored metrics for a specific batch.
@@ -263,9 +272,7 @@ impl TransactionAnalyticsContract {
 
     /// Retrieves an audit log by its index.
     pub fn get_audit_log(env: Env, index: u64) -> Option<AuditLog> {
-        env.storage()
-            .persistent()
-            .get(&DataKey::AuditLog(index))
+        env.storage().persistent().get(&DataKey::AuditLog(index))
     }
 
     /// Returns the total number of audit logs stored.
@@ -288,11 +295,7 @@ impl TransactionAnalyticsContract {
         compute_batch_metrics(&env, &transactions, current_ledger)
     }
 
-    pub fn submit_ratings(
-        env: Env,
-        user: Address,
-        ratings: Vec<RatingInput>,
-    ) -> Vec<RatingResult> {
+    pub fn submit_ratings(env: Env, user: Address, ratings: Vec<RatingInput>) -> Vec<RatingResult> {
         user.require_auth();
 
         let count = ratings.len();
@@ -318,10 +321,9 @@ impl TransactionAnalyticsContract {
                 if !known {
                     status = RatingStatus::UnknownTransaction;
                 } else {
-                    env.storage().persistent().set(
-                        &DataKey::Rating(input.tx_id, user.clone()),
-                        &input.score,
-                    );
+                    env.storage()
+                        .persistent()
+                        .set(&DataKey::Rating(input.tx_id, user.clone()), &input.score);
                 }
             }
 
