@@ -252,7 +252,7 @@ pub fn validate_transaction_for_bundle(
         };
     }
 
-    // Validate amount is not zero (optional - you might want to allow zero)
+    // Validate amount is not zero 
     // For now, we'll allow zero amounts
 
     // Transaction is valid
