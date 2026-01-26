@@ -129,7 +129,6 @@ fn test_process_multiple_transactions_batch() {
     
      
     // We should probably test with larger numbers to ensure fees > 0
-    // Fees: 100/1000=0, 200/1000=0, 300/1000=0, 400/1000=0. Total = 0.
     assert_eq!(metrics.total_fees, 0);
 }
 
