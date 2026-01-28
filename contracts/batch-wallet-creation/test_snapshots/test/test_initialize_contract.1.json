@@ -1,16 +1,18 @@
 {
   "generators": {
-    "address": 3,
+    "address": 2,
     "nonce": 0
   },
   "auth": [
+    [],
+    [],
     [],
     [],
     []
   ],
   "ledger": {
     "protocol_version": 22,
-    "sequence_number": 0,
+    "sequence_number": 12345,
     "timestamp": 0,
     "network_id": "0000000000000000000000000000000000000000000000000000000000000000",
     "base_reserve": 0,
@@ -57,7 +59,7 @@
                         "key": {
                           "vec": [
                             {
-                              "symbol": "LastBatchId"
+                              "symbol": "TotalBatches"
                             }
                           ]
                         },
@@ -69,7 +71,7 @@
                         "key": {
                           "vec": [
                             {
-                              "symbol": "TotalTxProcessed"
+                              "symbol": "TotalWalletsCreated"
                             }
                           ]
                         },
@@ -84,7 +86,7 @@
             },
             "ext": "v0"
           },
-          4095
+          16440
         ]
       ],
       [
@@ -105,7 +107,7 @@
             },
             "ext": "v0"
           },
-          4095
+          16440
         ]
       ]
     ]
